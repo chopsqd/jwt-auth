@@ -1,15 +1,22 @@
 const userService = require('../service/user-service')
+const {validationResult} = require('express-validator')
+const ApiError = require('../exceptions/api-error')
 
 class UserController {
     async registration(req, res, next) {
         try {
+            const errors = validationResult(req)
+            if(errors.isEmpty()) {
+                return next(ApiError.UnauthorizedError('Некорректные данные', errors.array()))
+            }
+
             const {email, password} = req.body
             const userData = await userService.registration(email, password)
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
 
             return res.json(userData)
         } catch(err) {
-            console.log(err)
+            next(err)
         }
     }
 
@@ -17,7 +24,7 @@ class UserController {
         try {
 
         } catch(err) {
-
+            next(err)
         }
     }
 
@@ -25,7 +32,7 @@ class UserController {
         try {
 
         } catch(err) {
-
+            next(err)
         }
     }
 
@@ -36,7 +43,7 @@ class UserController {
 
             return res.redirect(process.env.CLIENT_URL)
         } catch(err) {
-            console.log(err)
+            next(err)
         }
     }
 
@@ -44,7 +51,7 @@ class UserController {
         try {
 
         } catch(err) {
-
+            next(err)
         }
     }
 
@@ -52,7 +59,7 @@ class UserController {
         try {
             res.send('Its working!')
         } catch(err) {
-
+            next(err)
         }
     }
 }
